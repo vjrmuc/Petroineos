@@ -1,0 +1,5 @@
+column_name,datatype,is_mandatory,format,allowable_values,allowable_range,default_value
+date,date,True,%d/%m/%Y,,,
+time,datetime,True,%H:%M,".*:00|.*:05|.*:10|.*:15|.*:20|.*:25|.*:30|.*:35|.*:40|.*:45|.*:50|.*:55",23:00-22:55,
+volume,int,False,,,,0
+id,str,True,,,,
