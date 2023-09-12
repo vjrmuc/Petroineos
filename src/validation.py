@@ -9,19 +9,26 @@ class Validation(object):
         schema_df = pd.read_csv(file_name)
         return schema_df
 
-    def validate_data(self, validation_df):
+    def validate_data(self, validation_df, output_file_name):
         schema_df = self.read_schema()
         validated_df = validation_df.copy()
+        data_profiling = pd.DataFrame(["validation"])
+        new_row = {'validation': f""""Number of rows:{len(validation_df.index)}"""}
+        data_profiling.loc[len(data_profiling)] = new_row
+
 
         for i, r in schema_df.iterrows():
             print(f"""Validation for column: {r["column_name"]}""")
             print(r)
             try:
                 if r["column_name"] not in validation_df:
+                    data_profiling.loc[len(data_profiling)] = {'validation': f"""Column {r['column_name']} is not present in the dataset"""}
                     raise ValueError(f"""Column {r['column_name']} is not present in the dataset""")
                 if r["is_mandatory"] == "True":
                     validated_df[r["column_name"]] = pd.to_datetime(validation_df[r["column_name"]])
                     if validation_df[r["column_name"]].isnull().values.any():
+                        data_profiling = data_profiling.append(
+                            {'validation': f"""Mandatory column: {r["column_name"]} has null values"""})
                         raise ValueError(f"""Mandatory column: {r["column_name"]} has null values""")
 
                 if r["datatype"] == "date" or r["datatype"] == "datetime":
@@ -35,6 +42,9 @@ class Validation(object):
                     print(r["allowable_values"])
                     if validation_df[r["column_name"]].str.contains(r["allowable_values"], na=False).all():
                         print(validation_df[validation_df[r["column_name"]].str.contains(r["allowable_values"], na=False)])
+
+                        data_profiling = data_profiling.append(
+                            {'validation': f"""Data in column {r['column_name']} is not in the allowable values."""})
                         raise ValueError(f"""Data in column {r['column_name']} is not in the allowable values.""")
 
             except ValueError as e:
@@ -46,4 +56,5 @@ class Validation(object):
                 logging.error(
                     f"""Validation failed for column: {r['column_name']}, with datatype: {r['datatype']} with Exception: {e}.
                     Data has been discarded.""")
+        data_profiling.to_csv(f"""./{output_file_name}""")
         return validation_df

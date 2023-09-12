@@ -2,7 +2,7 @@ from src.aggregation import Aggregation
 
 
 aggregation = Aggregation()
-aggregation.aggregate("29/06/2021")
+aggregation.aggregate(".")
 
 # df_exploded["time"] = df_exploded["time"].str.split(':', expand=True)[0]
 # df_exploded["time"] = df_exploded["time"].apply(lambda x: f"{x}:00")
